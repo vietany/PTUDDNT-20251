@@ -1,19 +1,35 @@
 const express = require('express');
+const dotenv = require('dotenv');
+
+// Load env vars
+dotenv.config();
+
+// Sửa đường dẫn: Thêm ./src/
 const connectDB = require('./src/config/db');
-require('dotenv').config();
 
-const userRoutes = require('./src/routes/user.route');
+// Sửa đường dẫn: Thêm ./src/
+const categoryRoutes = require('./src/routes/category.routes');
+const unitRoutes = require('./src/routes/unit.routes');
 
+// Kiểm tra xem file này bạn đã tạo chưa, nếu chưa thì comment lại nhé
+// const userRoutes = require('./src/routes/user.route'); 
+
+// Kết nối DB
 connectDB();
 
 const app = express();
 
+// Middleware
 app.use(express.json({ extended: false }));
 app.use(express.urlencoded({ extended: true }));
 
-app.use('/it4788/user', userRoutes);
+// Routes
+app.use('/api/categories', categoryRoutes);
+app.use('/api/units', unitRoutes);
 
-app.get('/', (req, res) => res.send('API Đang chạy...'));
+// app.use('/it4788/user', userRoutes); // Bật lại khi đã có file user route
+
+app.get('/', (req, res) => res.send('API Đi Chợ Tiện Lợi đang chạy...'));
 
 const PORT = process.env.PORT || 5000;
 

@@ -1,12 +1,12 @@
 const mongoose = require('mongoose');
 
 const unitSchema = new mongoose.Schema({
-  unitName: {
+  name: {
     type: String,
     required: true,
-    unique: true,
-  },
-});
+    unique: true, // Ví dụ: kg, g, lít, chai, gói
+    trim: true
+  }
+}, { timestamps: true });
 
-const Unit = mongoose.model('Unit', unitSchema);
-module.exports = Unit;
+module.exports = mongoose.model('Unit', unitSchema);
