@@ -27,7 +27,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/api/categories', categoryRoutes);
 app.use('/api/units', unitRoutes);
 
-// app.use('/it4788/user', userRoutes); // Bật lại khi đã có file user route
+app.use('/it4788/user', userRoutes); // Bật lại khi đã có file user route
 
 app.get('/', (req, res) => res.send('API Đi Chợ Tiện Lợi đang chạy...'));
 
