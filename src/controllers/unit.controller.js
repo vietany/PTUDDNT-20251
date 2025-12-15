@@ -1,6 +1,6 @@
 const Unit = require('../models/unit.model');
 
-// 1. Create Unit
+
 exports.createUnit = async (req, res) => {
   try {
     const { name } = req.body;
@@ -12,7 +12,7 @@ exports.createUnit = async (req, res) => {
   }
 };
 
-// 2. Get All Units
+
 exports.getAllUnits = async (req, res) => {
   try {
     const units = await Unit.find();
@@ -22,7 +22,7 @@ exports.getAllUnits = async (req, res) => {
   }
 };
 
-// 3. Edit Unit
+
 exports.updateUnit = async (req, res) => {
   try {
     const { id } = req.params;
@@ -36,7 +36,7 @@ exports.updateUnit = async (req, res) => {
   }
 };
 
-// 4. Delete Unit
+
 exports.deleteUnit = async (req, res) => {
   try {
     const { id } = req.params;

@@ -4,7 +4,7 @@ const unitSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true,
-    unique: true, // Ví dụ: kg, g, lít, chai, gói
+    unique: true, 
     trim: true
   }
 }, { timestamps: true });

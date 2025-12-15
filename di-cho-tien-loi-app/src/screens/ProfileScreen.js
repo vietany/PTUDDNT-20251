@@ -15,7 +15,7 @@ const ProfileScreen = ({ setIsLoggedIn }) => {
   const handleLogout = async () => {
     await AsyncStorage.removeItem('userToken');
     await AsyncStorage.removeItem('userInfo');
-    // Gọi hàm cập nhật state ở App.js
+    
     setIsLoggedIn(false);
   };
 

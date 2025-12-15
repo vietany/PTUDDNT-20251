@@ -1,7 +1,7 @@
 const Group = require('../models/group.model');
 const User = require('../models/user.model');
 
-// Tạo nhóm mới
+
 exports.createGroup = async (req, res) => {
   try {
     const { name } = req.body;
@@ -11,7 +11,7 @@ exports.createGroup = async (req, res) => {
       members: [req.user._id]
     });
     
-    // Cập nhật User
+    
     await User.findByIdAndUpdate(req.user._id, { group: newGroup._id });
 
     res.status(201).json({ success: true, data: newGroup });
@@ -20,10 +20,10 @@ exports.createGroup = async (req, res) => {
   }
 };
 
-// Lấy thông tin nhóm của tôi
+
 exports.getMyGroup = async (req, res) => {
   try {
-    // Tìm user hiện tại để biết groupId
+    
     const user = await User.findById(req.user._id);
     if (!user.group) {
         return res.status(404).json({ success: false, message: "Bạn chưa tham gia nhóm nào." });

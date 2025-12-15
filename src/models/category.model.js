@@ -11,7 +11,7 @@ const categorySchema = new mongoose.Schema({
     type: String
   },
   image: {
-    type: String // URL đến ảnh icon của category
+    type: String 
   }
 }, { timestamps: true });
 

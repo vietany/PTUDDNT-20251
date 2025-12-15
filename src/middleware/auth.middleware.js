@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/user.model');
 
-// 1. Kiểm tra User đã đăng nhập chưa
+
 const protect = async (req, res, next) => {
   let token;
 
@@ -42,7 +42,7 @@ const protect = async (req, res, next) => {
   }
 };
 
-// 2. Kiểm tra có phải Admin không
+
 const isAdmin = (req, res, next) => {
   if (req.user && req.user.role === 'admin') {
     next();

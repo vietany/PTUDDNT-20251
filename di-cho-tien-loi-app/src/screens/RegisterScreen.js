@@ -16,7 +16,7 @@ const RegisterScreen = ({ onSwitch }) => {
 
     setLoading(true);
     try {
-      // API Backend: POST /it4788/user/
+      
       const res = await client.post('/', { 
         name, 
         email, 
@@ -25,7 +25,7 @@ const RegisterScreen = ({ onSwitch }) => {
       
       setLoading(false);
       
-      if (res.data.code === '00035') { // Code thành công 00035
+      if (res.data.code === '00035') { 
         Alert.alert(
           "Thành công", 
           "Đăng ký tài khoản thành công! Vui lòng đăng nhập.",

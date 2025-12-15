@@ -17,7 +17,7 @@ const GroupScreen = () => {
         setGroup(res.data.data);
       }
     } catch (error) {
-      // Nếu 404 nghĩa là chưa có nhóm
+      
       setGroup(null);
     }
   };

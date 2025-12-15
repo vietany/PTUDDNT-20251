@@ -14,11 +14,11 @@ const HomeScreen = () => {
 
   const fetchData = async () => {
     try {
-      // Lấy tên User
+      
       const userInfo = await AsyncStorage.getItem('userInfo');
       if (userInfo) setUser(JSON.parse(userInfo));
 
-      // Gọi API lấy danh mục (Của Hiệp)
+      
       const res = await client.get('/api/categories');
       if (res.data.success) {
         setCategories(res.data.data);

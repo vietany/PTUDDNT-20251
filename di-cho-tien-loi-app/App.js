@@ -5,7 +5,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
 
-// Screens
+
 import LoginScreen from './src/screens/LoginScreen';
 import RegisterScreen from './src/screens/RegisterScreen';
 import HomeScreen from './src/screens/HomeScreen';
@@ -15,7 +15,7 @@ import ProfileScreen from './src/screens/ProfileScreen';
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
-// Màn hình Auth (Login/Register)
+
 const AuthStack = ({ setIsLoggedIn }) => (
   <Stack.Navigator screenOptions={{ headerShown: false }}>
     <Stack.Screen name="Login">
@@ -25,7 +25,7 @@ const AuthStack = ({ setIsLoggedIn }) => (
   </Stack.Navigator>
 );
 
-// Màn hình chính (Tabs)
+
 const MainTabs = ({ setIsLoggedIn }) => (
   <Tab.Navigator
     screenOptions={({ route }) => ({
