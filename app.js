@@ -9,10 +9,11 @@ const connectDB = require('./src/config/db');
 
 // Sửa đường dẫn: Thêm ./src/
 const categoryRoutes = require('./src/routes/category.routes');
+const groupRoutes = require('./src/routes/group.routes');
 const unitRoutes = require('./src/routes/unit.routes');
 
 // Kiểm tra xem file này bạn đã tạo chưa, nếu chưa thì comment lại nhé
-// const userRoutes = require('./src/routes/user.route'); 
+const userRoutes = require('./src/routes/user.route'); 
 
 // Kết nối DB
 connectDB();
@@ -26,6 +27,7 @@ app.use(express.urlencoded({ extended: true }));
 // Routes
 app.use('/api/categories', categoryRoutes);
 app.use('/api/units', unitRoutes);
+app.use('/api/groups', groupRoutes);
 
 app.use('/it4788/user', userRoutes); // Bật lại khi đã có file user route
 
