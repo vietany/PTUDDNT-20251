@@ -23,7 +23,7 @@ const LoginScreen = ({ onLoginSuccess }) => {
 
     try {
       
-      const res = await client.post('/login', { email, password }, { timeout: 5000 });
+      const res = await client.post('/it4788/user/login', { email, password }, { timeout: 5000 });
       
       console.log("[LOGIN] Kết quả:", res.status, res.data);
       setLoading(false);
