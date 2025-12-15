@@ -1,62 +1,50 @@
-https://github.com/vietany/PTUDDNT-20251
+# DI CHO TIEN LOI (GROCERY APP)
 
-Công nghệ chốt:
+Đồ án môn học: Phát triển ứng dụng đa nền tảng (IT4788)
 
-•	Backend: Node.js / Express
+## GIỚI THIỆU
+Ứng dụng quản lý sinh hoạt gia đình, hỗ trợ đi chợ, quản lý thực phẩm trong tủ lạnh và lên kế hoạch ăn uống. Hệ thống bao gồm Backend (Node.js) và Mobile App (React Native).
 
-•	Database: MongoDB
+## TÍNH NĂNG ĐÃ HOÀN THIỆN
 
-•	Triển khai: Heroku
+1. **Xác thực (Authentication)**
+   - Đăng ký, Đăng nhập, Tự động lưu phiên đăng nhập.
+   - Phân quyền User/Admin.
 
-Việc chung: Anh đã push khung sườn dự án (cấu trúc thư mục, 5 models cơ bản) lên Git. Mọi người git pull origin main và npm install.
+2. **Quản lý Nhóm (Group)**
+   - Tạo nhóm gia đình mới.
+   - Mời thành viên qua email.
+   - Rời nhóm, Xóa thành viên (Admin nhóm).
 
-\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+3. **Tủ lạnh (Fridge)**
+   - Quản lý danh sách thực phẩm đang có.
+   - Cảnh báo hạn sử dụng (Hiển thị màu đỏ khi hết hạn).
+   - Thêm, Sửa, Xóa thực phẩm.
 
-Nhiệm vụ của Việt Anh (Lead):
+4. **Đi chợ (Shopping List)**
+   - Tạo danh sách mua sắm theo sự kiện.
+   - Thêm món cần mua.
+   - Đánh dấu đã mua (Checklist).
 
-1.Usecase 1 (Authentication): Hiện thực Register, Login (tạo JWT), Refresh Token, Verify Email.
+5. **Lên lịch & Công thức (Meal & Recipe)**
+   - Lên thực đơn (Sáng, Trưa, Tối) theo ngày.
+   - Quản lý kho công thức nấu ăn.
 
-2.Auth Middleware: Tạo file src/middleware/auth.middleware.js (hàm protect) để giải mã token và gắn req.user. Push file này lên sớm nhất.
+6. **Báo cáo (Report)**
+   - Thống kê số lượng thực phẩm.
+   - Cảnh báo số lượng món sắp hết hạn trong 3 ngày tới.
 
-3.Routes: Kết nối tất cả routes (của cả 3 người) vào app.js.
+## CÀI ĐẶT VÀ CHẠY DỰ ÁN
 
+**Yêu cầu:** Đã cài đặt Node.js và Python.
 
+**Cách 1: Chạy tự động (Khuyến nghị)**
+1. Tìm file `RUN_PROJECT.bat` tại thư mục gốc.
+2. Double click để khởi động.
+   - Script sẽ tự động cập nhật IP máy tính vào cấu hình App.
+   - Tự động bật Server Backend và App Frontend.
 
-Nhiệm vụ của Hiệp (Backend Developer):
-
-1.Thiết kế Sơ đồ Logic CSDL:Vẽ một sơ đồ logic cho MongoDB (thể hiện các Collections và mối quan hệ tham chiếu/nhúng).
-
-2.Usecase 4 (Quản lý Category): Hiện thực 4 API: Create, Get all, Edit, Delete (dùng category.model.js).
-
-3.Usecase 5 (Quản lý Unit): Hiện thực 4 API: Create, Get all, Edit, Delete (dùng unit.model.js).
-
-4.Tích hợp: Sau khi có file middleware, git pull về và thêm vào các route trên để kiểm tra quyền Admin.
-
-
-
-Nhiệm vụ của Minh Đức (Backend Developer):
-
-1.Usecase 3 (Quản lý Group): Hiện thực các API: Create group, Add member, Delete member, Get members (dùng group.model.js, user.model.js).
-
-2.Usecase 2 (Quản lý Tài khoản): Hiện thực các API: Change password, Edit user, Get user, Delete user.
-
-\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
-
-Quy trình làm việc (Bắt buộc):
-
-1.Pull: Luôn git pull origin main trước khi code.
-
-2.Tạo nhánh: Tạo nhánh mới cho mỗi Usecase (ví dụ: feature/hiep-usecase-4).
-
-3.Code \& Commit: Code trên nhánh riêng.
-
-4.Tạo Pull Request (PR): Push nhánh và tạo PR, gán Việt Anh làm "Reviewer".
-
-5.Merge: Việt Anh sẽ review và merge vào main.
-
-Bắt đầu.
-
-
-
-
+**Cách 2: Chạy thủ công**
+- Backend: `node app.js` (Port 5000)
+- Frontend: `cd di-cho-tien-loi-app` -> `npx expo start -c`
 
