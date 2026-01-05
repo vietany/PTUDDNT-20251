@@ -1,10 +1,18 @@
 import React, { useState } from 'react';
-import { View, Text, FlatList, StyleSheet, TouchableOpacity, Alert, TextInput } from 'react-native';
+import { View, Text, FlatList, StyleSheet, TouchableOpacity, Alert, TextInput, Platform } from 'react-native';
 import client from '../api/client';
 import { useFocusEffect } from '@react-navigation/native';
 
+import Toast from '../components/Toast';
+
 const ShoppingScreen = () => {
   const [lists, setLists] = useState([]);
+  const [toast, setToast] = useState({ message: '', type: '' });
+
+  const showToast = (msg, type = 'success') => {
+    setToast({ message: msg, type });
+    setTimeout(() => setToast({ message: '', type: '' }), 3000);
+  };
   const [newListName, setNewListName] = useState('');
   const [showInput, setShowInput] = useState(false);
 
@@ -29,20 +37,34 @@ const ShoppingScreen = () => {
       await client.post('/it4788/shopping', { name: newListName });
       setNewListName('');
       setShowInput(false);
+      showToast('Tạo danh sách thành công!', 'success');
       fetchLists();
-    } catch (e) { }
+    } catch (e) { showToast('Lỗi khi tạo danh sách', 'error'); }
   }
 
   const deleteList = (id) => {
-    Alert.alert("Xóa", "Xóa danh sách này?", [
-      { text: "Hủy" },
-      {
-        text: "Xóa", onPress: async () => {
-          await client.delete(`/it4788/shopping/${id}`);
-          fetchLists();
-        }
+    if (Platform.OS === 'web') {
+      if (window.confirm("Bạn có chắc chắn muốn xóa danh sách này không?")) {
+        handleDelete(id);
       }
-    ]);
+    } else {
+      Alert.alert("Xóa", "Xóa danh sách này?", [
+        { text: "Hủy" },
+        { text: "Xóa", onPress: () => handleDelete(id) }
+      ]);
+    }
+  }
+
+  const handleDelete = async (id) => {
+    try {
+      console.log("[DELETE] Calling API for ID:", id);
+      await client.delete(`/it4788/shopping/${id}`);
+      showToast('Đã xóa danh sách', 'success');
+      fetchLists();
+    } catch (e) {
+      console.log("[DELETE ERROR]", e);
+      showToast('Lỗi khi xóa: ' + (e.message || 'Unknown'), 'error');
+    }
   }
 
   const toggleTask = async (listId, taskId) => {
@@ -65,17 +87,29 @@ const ShoppingScreen = () => {
       await client.post('/it4788/shopping/task', { listId, foodName: newItemName, quantity: '1' });
       setNewItemName('');
       setAddingToListId(null);
+      setAddingToListId(null);
+      showToast('Thêm món thành công!', 'success');
       fetchLists();
-    } catch (e) { console.log(e); }
+    } catch (e) {
+      console.log(e);
+      showToast('Lỗi khi thêm món', 'error');
+    }
   }
 
   return (
     <View style={styles.container}>
+      {toast.message ? <Toast message={toast.message} type={toast.type} onHide={() => setToast({ message: '', type: '' })} /> : null}
       <Text style={styles.header}>📝 Danh Sách Đi Chợ</Text>
 
       {showInput && (
         <View style={{ flexDirection: 'row', marginBottom: 10 }}>
-          <TextInput style={styles.input} placeholder="Tên danh sách..." value={newListName} onChangeText={setNewListName} />
+          <TextInput
+            style={styles.input}
+            placeholder="Tên danh sách..."
+            placeholderTextColor="#888"
+            value={newListName}
+            onChangeText={setNewListName}
+          />
           <TouchableOpacity onPress={createList} style={styles.addBtn}><Text style={{ color: 'white' }}>Lưu</Text></TouchableOpacity>
         </View>
       )}
@@ -104,6 +138,7 @@ const ShoppingScreen = () => {
                 <TextInput
                   style={[styles.input, { marginRight: 5 }]}
                   placeholder="Tên món..."
+                  placeholderTextColor="#888"
                   autoFocus={true}
                   value={newItemName}
                   onChangeText={setNewItemName}
@@ -143,8 +178,8 @@ const styles = StyleSheet.create({
   taskRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 5 },
   taskText: { fontSize: 16 },
   strikeText: { textDecorationLine: 'line-through', color: 'gray' },
-  fab: { position: 'absolute', bottom: 20, right: 20, width: 60, height: 60, borderRadius: 30, backgroundColor: '#e65100', justifyContent: 'center', alignItems: 'center' },
-  input: { flex: 1, borderWidth: 1, borderColor: '#ccc', padding: 10, borderRadius: 5, backgroundColor: 'white', marginRight: 10 },
+  fab: { position: 'absolute', bottom: 20, right: 20, width: 60, height: 60, borderRadius: 30, backgroundColor: '#e65100', justifyContent: 'center', alignItems: 'center', shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.3, elevation: 5 },
+  input: { flex: 1, borderWidth: 1, borderColor: '#999', padding: 10, borderRadius: 5, backgroundColor: 'white', marginRight: 10, color: '#333' },
   addBtn: { backgroundColor: '#e65100', padding: 10, borderRadius: 5, justifyContent: 'center' }
 });
 export default ShoppingScreen;
