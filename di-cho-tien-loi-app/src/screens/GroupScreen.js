@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, FlatList, TextInput, Alert, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, FlatList, TextInput, Alert, StyleSheet, ScrollView, Platform, StatusBar, Modal } from 'react-native';
 import client from '../api/client';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Toast from '../components/Toast';
 
@@ -11,6 +11,11 @@ const GroupScreen = () => {
   const [inviteEmail, setInviteEmail] = useState('');
   const [user, setUser] = useState(null);
   const [toast, setToast] = useState({ message: '', type: '' });
+
+  // Member Details Modal
+  const [selectedMember, setSelectedMember] = useState(null);
+  const [detailModalVisible, setDetailModalVisible] = useState(false);
+
   const navigation = useNavigation();
 
   const showToast = (msg, type = 'success') => {
@@ -18,10 +23,12 @@ const GroupScreen = () => {
     setTimeout(() => setToast({ message: '', type: '' }), 3000);
   };
 
-  useEffect(() => {
-    fetchGroup();
-    getUserInfo();
-  }, []);
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchGroup();
+      getUserInfo();
+    }, [])
+  );
 
   const getUserInfo = async () => {
     const u = await AsyncStorage.getItem('userInfo');
@@ -79,6 +86,11 @@ const GroupScreen = () => {
     } catch (e) { showToast("Lỗi: Không xóa được", "error"); }
   };
 
+  const openMemberDetail = (member) => {
+    setSelectedMember(member);
+    setDetailModalVisible(true);
+  }
+
   if (!group) {
     return (
       <View style={styles.container}>
@@ -111,15 +123,16 @@ const GroupScreen = () => {
       </View>
 
       <Text style={styles.subtitle}>Thành viên ({group.members.length})</Text>
+      <Text style={styles.subtitle}>Thành viên ({group.members.length})</Text>
       {group.members.map((mem) => (
         <View key={mem._id} style={styles.memberRow}>
-          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <TouchableOpacity onPress={() => openMemberDetail(mem)} style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
             <View style={styles.avatar}><Text style={{ color: 'white' }}>{mem.name[0]}</Text></View>
             <View>
               <Text style={styles.memberName}>{mem.name} {group.admin && (mem._id === group.admin._id || mem._id === group.admin) ? '👑' : ''}</Text>
               <Text style={styles.memberEmail}>{mem.email}</Text>
             </View>
-          </View>
+          </TouchableOpacity>
           {isAdmin && mem._id !== user._id && (
             <TouchableOpacity onPress={() => removeMember(mem._id)}>
               <Text style={{ color: 'red' }}>Kick</Text>
@@ -144,12 +157,43 @@ const GroupScreen = () => {
           </TouchableOpacity>
         </View>
       )}
+
+
+      {/* Member Detail Modal */}
+      <Modal visible={detailModalVisible} transparent animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Thông tin thành viên</Text>
+            {selectedMember && (
+              <View style={{ alignItems: 'center' }}>
+                <View style={[styles.avatar, { width: 80, height: 80, borderRadius: 40, marginBottom: 15 }]}>
+                  <Text style={{ fontSize: 30, color: 'white' }}>{selectedMember.name[0]}</Text>
+                </View>
+                <Text style={{ fontSize: 22, fontWeight: 'bold' }}>{selectedMember.name}</Text>
+                <Text style={{ color: 'gray', marginBottom: 20 }}>{selectedMember.email}</Text>
+
+                <View style={{ width: '100%', paddingHorizontal: 20 }}>
+                  <Text style={{ marginBottom: 5 }}>📞 SĐT: {selectedMember.phone || 'Chưa cập nhật'}</Text>
+                  <Text style={{ marginBottom: 5 }}>🎂 Ngày sinh: {selectedMember.dob ? new Date(selectedMember.dob).toLocaleDateString('vi-VN') : 'Chưa cập nhật'}</Text>
+                </View>
+              </View>
+            )}
+            <TouchableOpacity onPress={() => setDetailModalVisible(false)} style={{ marginTop: 20, alignItems: 'center' }}>
+              <Text style={{ color: 'red', fontWeight: 'bold' }}>ĐÓNG</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
     </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, paddingTop: 40, backgroundColor: '#fff' },
+  container: { flex: 1, padding: 20, paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight + 20 : 60, backgroundColor: '#fff' },
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', padding: 20 },
+  modalContent: { backgroundColor: 'white', borderRadius: 10, padding: 20 },
+  modalTitle: { fontSize: 20, fontWeight: 'bold', marginBottom: 15, textAlign: 'center' },
   headerBox: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
   title: { fontSize: 24, fontWeight: 'bold', color: '#d35400' },
   leaveBtn: { backgroundColor: '#c0392b', padding: 8, borderRadius: 5 },

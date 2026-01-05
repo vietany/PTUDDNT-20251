@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, FlatList, StyleSheet, TouchableOpacity, Alert, TextInput, Platform } from 'react-native';
+import { View, Text, FlatList, StyleSheet, TouchableOpacity, Alert, TextInput, Platform, StatusBar } from 'react-native';
 import client from '../api/client';
 import { useFocusEffect } from '@react-navigation/native';
 
@@ -171,7 +171,7 @@ const ShoppingScreen = () => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, backgroundColor: '#fff3e0' },
+  container: { flex: 1, padding: 20, backgroundColor: '#fff3e0', paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight + 20 : 60 },
   header: { fontSize: 24, fontWeight: 'bold', marginBottom: 20, color: '#e65100' },
   card: { backgroundColor: 'white', padding: 15, borderRadius: 10, marginBottom: 15, borderLeftWidth: 5, borderLeftColor: '#e65100' },
   listName: { fontSize: 18, fontWeight: 'bold', marginBottom: 10 },

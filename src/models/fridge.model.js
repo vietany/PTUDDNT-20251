@@ -5,7 +5,8 @@ const fridgeItemSchema = new mongoose.Schema({
   quantity: { type: Number, required: true, default: 1 },
   useWithin: { type: Date }, // Hạn sử dụng
   note: { type: String, default: '' },
-  group: { type: mongoose.Schema.Types.ObjectId, ref: 'Group', required: true }
+  group: { type: mongoose.Schema.Types.ObjectId, ref: 'Group' }, // Không required nữa
+  user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }    // Thêm owner cá nhân
 }, { timestamps: true });
 
 module.exports = mongoose.model('FridgeItem', fridgeItemSchema);
