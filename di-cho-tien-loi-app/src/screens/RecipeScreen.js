@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, StyleSheet, TouchableOpacity, Alert, Modal, TextInput, ScrollView } from 'react-native';
+import { View, Text, FlatList, StyleSheet, TouchableOpacity, Alert, Modal, TextInput, ScrollView, Platform } from 'react-native';
 import client from '../api/client';
 
 const RecipeScreen = () => {
@@ -39,6 +39,30 @@ const RecipeScreen = () => {
     } catch (e) { Alert.alert("Lỗi", "Thất bại"); }
   }
 
+  const deleteRecipe = async (id) => {
+    if (Platform.OS === 'web') {
+      if (window.confirm("Bạn có chắc muốn xóa công thức này?")) {
+        try {
+          await client.delete(`/it4788/recipe/${id}`);
+          fetchRecipes();
+        } catch (e) { console.log(e); }
+      }
+      return;
+    }
+
+    Alert.alert("Xóa", "Bạn có chắc muốn xóa công thức này?", [
+      { text: "Hủy", style: "cancel" },
+      {
+        text: "Xóa", style: 'destructive', onPress: async () => {
+          try {
+            await client.delete(`/it4788/recipe/${id}`);
+            fetchRecipes();
+          } catch (e) { Alert.alert("Lỗi", "Không xóa được"); }
+        }
+      }
+    ]);
+  }
+
   const openEdit = (item) => {
     setEditingId(item._id);
     setName(item.name);
@@ -63,9 +87,14 @@ const RecipeScreen = () => {
           <View style={styles.card}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
               <Text style={styles.title}>{item.name}</Text>
-              <TouchableOpacity onPress={() => openEdit(item)}>
-                <Text style={{ color: 'blue', fontWeight: 'bold' }}>Sửa</Text>
-              </TouchableOpacity>
+              <View style={{ flexDirection: 'row' }}>
+                <TouchableOpacity onPress={() => openEdit(item)} style={{ marginRight: 15 }}>
+                  <Text style={{ color: 'blue', fontWeight: 'bold' }}>Sửa</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => deleteRecipe(item._id)}>
+                  <Text style={{ color: 'red', fontWeight: 'bold' }}>Xóa</Text>
+                </TouchableOpacity>
+              </View>
             </View>
             <Text style={{ fontStyle: 'italic', marginBottom: 5 }}>{item.description}</Text>
             <Text style={{ fontWeight: 'bold' }}>Nguyên liệu:</Text>

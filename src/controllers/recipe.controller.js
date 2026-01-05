@@ -33,3 +33,9 @@ exports.updateRecipe = async (req, res) => {
     res.status(200).json({ code: '00388', data: updatedRecipe });
   } catch (error) { res.status(500).json({ message: error.message }); }
 };
+exports.deleteRecipe = async (req, res) => {
+  try {
+    await Recipe.findByIdAndDelete(req.params.id);
+    res.status(200).json({ code: '00399', message: 'Đã xóa công thức' });
+  } catch (error) { res.status(500).json({ message: error.message }); }
+};

@@ -119,6 +119,15 @@ const FridgeScreen = () => {
   };
 
   const deleteItem = (id) => {
+    if (Platform.OS === 'web') {
+      if (window.confirm("Bạn đã dùng hết món này?")) {
+        client.delete(`/it4788/fridge/${id}`)
+          .then(() => fetchFridgeItems())
+          .catch(e => console.log("Lỗi xóa:", e));
+      }
+      return;
+    }
+
     Alert.alert("Xóa", "Bạn đã dùng hết món này?", [
       { text: "Chưa", style: "cancel" },
       {
@@ -152,9 +161,13 @@ const FridgeScreen = () => {
             <Text style={{ fontSize: 20 }}>🏠</Text>
             <Text style={[styles.catFilterText, selectedCategory === 'All' && styles.catFilterTextSelected]}>Tất cả</Text>
           </TouchableOpacity>
-          {categories.map((c) => (
-            <TouchableOpacity key={c.name} onPress={() => setSelectedCategory(c.name)} style={[styles.catFilter, selectedCategory === c.name && styles.catFilterSelected]}>
-              <Text>{c.icon}</Text>
+          {categories.map((c, index) => (
+            <TouchableOpacity
+              key={index}
+              style={[styles.catFilter, selectedCategory === c.name && styles.catFilterSelected]}
+              onPress={() => setSelectedCategory(c.name)}
+            >
+              <Text style={{ fontSize: 20 }}>{c.icon}</Text>
               <Text style={[styles.catFilterText, selectedCategory === c.name && styles.catFilterTextSelected]}>{c.name}</Text>
             </TouchableOpacity>
           ))}
