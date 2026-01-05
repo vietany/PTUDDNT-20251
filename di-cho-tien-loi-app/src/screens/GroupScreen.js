@@ -123,7 +123,7 @@ const GroupScreen = () => {
       </View>
 
       <Text style={styles.subtitle}>Thành viên ({group.members.length})</Text>
-      <Text style={styles.subtitle}>Thành viên ({group.members.length})</Text>
+
       {group.members.map((mem) => (
         <View key={mem._id} style={styles.memberRow}>
           <TouchableOpacity onPress={() => openMemberDetail(mem)} style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
