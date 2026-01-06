@@ -35,6 +35,8 @@ const userSchema = new mongoose.Schema(
       unique: true,
       sparse: true,
     },
+    phone: { type: String, required: false }, // Số điện thoại
+    dob: { type: Date, required: false }, // Ngày sinh
     role: {
       type: String,
       enum: ['user', 'admin'],

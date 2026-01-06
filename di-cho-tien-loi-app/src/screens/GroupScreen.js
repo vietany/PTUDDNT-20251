@@ -1,24 +1,38 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, FlatList, TextInput, Alert, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, FlatList, TextInput, Alert, StyleSheet, ScrollView, Platform, StatusBar, Modal } from 'react-native';
 import client from '../api/client';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Toast from '../components/Toast';
 
 const GroupScreen = () => {
   const [group, setGroup] = useState(null);
   const [newGroupName, setNewGroupName] = useState('');
   const [inviteEmail, setInviteEmail] = useState('');
   const [user, setUser] = useState(null);
+  const [toast, setToast] = useState({ message: '', type: '' });
+
+  // Member Details Modal
+  const [selectedMember, setSelectedMember] = useState(null);
+  const [detailModalVisible, setDetailModalVisible] = useState(false);
+
   const navigation = useNavigation();
 
-  useEffect(() => {
-    fetchGroup();
-    getUserInfo();
-  }, []);
+  const showToast = (msg, type = 'success') => {
+    setToast({ message: msg, type });
+    setTimeout(() => setToast({ message: '', type: '' }), 3000);
+  };
+
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchGroup();
+      getUserInfo();
+    }, [])
+  );
 
   const getUserInfo = async () => {
     const u = await AsyncStorage.getItem('userInfo');
-    if(u) setUser(JSON.parse(u));
+    if (u) setUser(JSON.parse(u));
   }
 
   const fetchGroup = async () => {
@@ -33,53 +47,64 @@ const GroupScreen = () => {
     try {
       await client.post('/it4788/group', { name: newGroupName });
       fetchGroup();
-    } catch (e) { Alert.alert("Lỗi", "Không tạo được nhóm"); }
+      showToast("Tạo nhóm thành công!", "success");
+    } catch (e) { showToast("Lỗi: Không tạo được nhóm", "error"); }
   };
 
   const inviteMember = async () => {
     if (!inviteEmail) return;
     try {
       await client.post('/it4788/group/invite', { email: inviteEmail });
-      Alert.alert("Thành công", "Đã thêm thành viên mới!");
+      showToast("Đã gửi lời mời thành công!", "success");
       setInviteEmail('');
       fetchGroup();
-    } catch (e) { 
-        Alert.alert("Lỗi", e.response?.data?.message || "Không mời được"); 
+    } catch (e) {
+      showToast(e.response?.data?.message || "Không mời được", "error");
     }
   };
 
   const leaveGroup = async () => {
     Alert.alert("Xác nhận", "Bạn có chắc muốn rời nhóm?", [
       { text: "Hủy", style: "cancel" },
-      { text: "Rời nhóm", style: 'destructive', onPress: async () => {
+      {
+        text: "Rời nhóm", style: 'destructive', onPress: async () => {
           try {
             await client.post('/it4788/group/leave');
             setGroup(null);
-            Alert.alert("Thông báo", "Bạn đã rời nhóm.");
-          } catch (e) { Alert.alert("Lỗi", "Không rời được nhóm"); }
-      }}
+            showToast("Bạn đã rời nhóm.", "success");
+          } catch (e) { showToast("Lỗi: Không rời được nhóm", "error"); }
+        }
+      }
     ]);
   };
 
   const removeMember = async (memberId) => {
     try {
-        await client.post('/it4788/group/remove', { memberId });
-        fetchGroup();
-    } catch (e) { Alert.alert("Lỗi", "Không xóa được"); }
+      await client.post('/it4788/group/remove', { memberId });
+      fetchGroup();
+      showToast("Đã xóa thành viên", "success");
+    } catch (e) { showToast("Lỗi: Không xóa được", "error"); }
   };
+
+  const openMemberDetail = (member) => {
+    setSelectedMember(member);
+    setDetailModalVisible(true);
+  }
 
   if (!group) {
     return (
       <View style={styles.container}>
+        {toast.message ? <Toast message={toast.message} type={toast.type} onHide={() => setToast({ message: '', type: '' })} /> : null}
         <Text style={styles.title}>Bạn chưa có nhóm</Text>
-        <TextInput 
-            style={styles.input} 
-            placeholder="Tên nhóm mới..." 
-            value={newGroupName}
-            onChangeText={setNewGroupName}
+        <TextInput
+          style={styles.input}
+          placeholder="Tên nhóm mới..."
+          placeholderTextColor="#888"
+          value={newGroupName}
+          onChangeText={setNewGroupName}
         />
         <TouchableOpacity style={styles.button} onPress={createGroup}>
-            <Text style={styles.buttonText}>TẠO NHÓM MỚI</Text>
+          <Text style={styles.buttonText}>TẠO NHÓM MỚI</Text>
         </TouchableOpacity>
       </View>
     );
@@ -89,60 +114,94 @@ const GroupScreen = () => {
 
   return (
     <ScrollView style={styles.container}>
+      {toast.message ? <Toast message={toast.message} type={toast.type} onHide={() => setToast({ message: '', type: '' })} /> : null}
       <View style={styles.headerBox}>
         <Text style={styles.title}>🏠 {group.name}</Text>
         <TouchableOpacity onPress={leaveGroup} style={styles.leaveBtn}>
-            <Text style={{color:'white', fontWeight:'bold'}}>Rời nhóm</Text>
+          <Text style={{ color: 'white', fontWeight: 'bold' }}>Rời nhóm</Text>
         </TouchableOpacity>
       </View>
 
       <Text style={styles.subtitle}>Thành viên ({group.members.length})</Text>
+
       {group.members.map((mem) => (
         <View key={mem._id} style={styles.memberRow}>
-            <View style={{flexDirection:'row', alignItems:'center'}}>
-                <View style={styles.avatar}><Text style={{color:'white'}}>{mem.name[0]}</Text></View>
-                <View>
-                    <Text style={styles.memberName}>{mem.name} {mem._id === group.admin._id ? '👑' : ''}</Text>
-                    <Text style={styles.memberEmail}>{mem.email}</Text>
-                </View>
+          <TouchableOpacity onPress={() => openMemberDetail(mem)} style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
+            <View style={styles.avatar}><Text style={{ color: 'white' }}>{mem.name[0]}</Text></View>
+            <View>
+              <Text style={styles.memberName}>{mem.name} {group.admin && (mem._id === group.admin._id || mem._id === group.admin) ? '👑' : ''}</Text>
+              <Text style={styles.memberEmail}>{mem.email}</Text>
             </View>
-            {isAdmin && mem._id !== user._id && (
-                <TouchableOpacity onPress={() => removeMember(mem._id)}>
-                    <Text style={{color:'red'}}>Kick</Text>
-                </TouchableOpacity>
-            )}
+          </TouchableOpacity>
+          {isAdmin && mem._id !== user._id && (
+            <TouchableOpacity onPress={() => removeMember(mem._id)}>
+              <Text style={{ color: 'red' }}>Kick</Text>
+            </TouchableOpacity>
+          )}
         </View>
       ))}
 
       {isAdmin && (
-          <View style={styles.inviteBox}>
-            <Text style={styles.subtitle}>Mời thành viên</Text>
-            <TextInput 
-                style={styles.input} 
-                placeholder="Nhập email người cần mời..." 
-                value={inviteEmail}
-                onChangeText={setInviteEmail}
-                autoCapitalize="none"
-            />
-            <TouchableOpacity style={[styles.button, {backgroundColor:'#27ae60'}]} onPress={inviteMember}>
-                <Text style={styles.buttonText}>GỬI LỜI MỜI</Text>
+        <View style={styles.inviteBox}>
+          <Text style={styles.subtitle}>Mời thành viên</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Nhập email người cần mời..."
+            placeholderTextColor="#888"
+            value={inviteEmail}
+            onChangeText={setInviteEmail}
+            autoCapitalize="none"
+          />
+          <TouchableOpacity style={[styles.button, { backgroundColor: '#27ae60' }]} onPress={inviteMember}>
+            <Text style={styles.buttonText}>GỬI LỜI MỜI</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
+
+      {/* Member Detail Modal */}
+      <Modal visible={detailModalVisible} transparent animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Thông tin thành viên</Text>
+            {selectedMember && (
+              <View style={{ alignItems: 'center' }}>
+                <View style={[styles.avatar, { width: 80, height: 80, borderRadius: 40, marginBottom: 15 }]}>
+                  <Text style={{ fontSize: 30, color: 'white' }}>{selectedMember.name[0]}</Text>
+                </View>
+                <Text style={{ fontSize: 22, fontWeight: 'bold' }}>{selectedMember.name}</Text>
+                <Text style={{ color: 'gray', marginBottom: 20 }}>{selectedMember.email}</Text>
+
+                <View style={{ width: '100%', paddingHorizontal: 20 }}>
+                  <Text style={{ marginBottom: 5 }}>📞 SĐT: {selectedMember.phone || 'Chưa cập nhật'}</Text>
+                  <Text style={{ marginBottom: 5 }}>🎂 Ngày sinh: {selectedMember.dob ? new Date(selectedMember.dob).toLocaleDateString('vi-VN') : 'Chưa cập nhật'}</Text>
+                </View>
+              </View>
+            )}
+            <TouchableOpacity onPress={() => setDetailModalVisible(false)} style={{ marginTop: 20, alignItems: 'center' }}>
+              <Text style={{ color: 'red', fontWeight: 'bold' }}>ĐÓNG</Text>
             </TouchableOpacity>
           </View>
-      )}
+        </View>
+      </Modal>
+
     </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, paddingTop: 40, backgroundColor: '#fff' },
-  headerBox: { flexDirection:'row', justifyContent:'space-between', alignItems:'center', marginBottom:20 },
+  container: { flex: 1, padding: 20, paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight + 20 : 60, backgroundColor: '#fff' },
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', padding: 20 },
+  modalContent: { backgroundColor: 'white', borderRadius: 10, padding: 20 },
+  modalTitle: { fontSize: 20, fontWeight: 'bold', marginBottom: 15, textAlign: 'center' },
+  headerBox: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
   title: { fontSize: 24, fontWeight: 'bold', color: '#d35400' },
   leaveBtn: { backgroundColor: '#c0392b', padding: 8, borderRadius: 5 },
   subtitle: { fontSize: 18, fontWeight: 'bold', marginBottom: 10, marginTop: 10 },
-  input: { borderWidth: 1, borderColor: '#ccc', padding: 12, borderRadius: 8, marginBottom: 10 },
+  input: { borderWidth: 1, borderColor: '#999', padding: 12, borderRadius: 8, marginBottom: 10, color: '#333' },
   button: { backgroundColor: '#d35400', padding: 12, borderRadius: 8, alignItems: 'center' },
   buttonText: { color: '#fff', fontWeight: 'bold' },
-  memberRow: { flexDirection: 'row', justifyContent:'space-between', alignItems: 'center', marginBottom: 10, padding: 10, backgroundColor: '#fdf2e9', borderRadius: 8 },
+  memberRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10, padding: 10, backgroundColor: '#fdf2e9', borderRadius: 8 },
   avatar: { width: 40, height: 40, backgroundColor: '#e67e22', borderRadius: 20, justifyContent: 'center', alignItems: 'center', marginRight: 10 },
   memberName: { fontWeight: 'bold', fontSize: 16 },
   memberEmail: { color: 'gray', fontSize: 12 },

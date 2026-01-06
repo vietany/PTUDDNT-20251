@@ -29,7 +29,7 @@ exports.getMyGroup = async (req, res) => {
     const user = await User.findById(req.user._id);
     if (!user.group) return res.status(404).json({ code: '00096', message: 'Chưa vào nhóm' });
 
-    const group = await Group.findById(user.group).populate('members', 'name email role');
+    const group = await Group.findById(user.group).populate('members', 'name email role phone dob');
     res.status(200).json({ code: '00098', data: group });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -45,7 +45,7 @@ exports.inviteMember = async (req, res) => {
 
     // Check quyền Admin nhóm
     if (group.admin.toString() !== adminUser._id.toString()) {
-        return res.status(403).json({ message: 'Bạn không phải trưởng nhóm' });
+      return res.status(403).json({ message: 'Bạn không phải trưởng nhóm' });
     }
 
     const member = await User.findOne({ email });
@@ -72,19 +72,19 @@ exports.leaveGroup = async (req, res) => {
     if (!user.group) return res.status(400).json({ message: 'Bạn chưa có nhóm' });
 
     const group = await Group.findById(user.group);
-    
+
     // Xóa user khỏi list members
     group.members = group.members.filter(m => m.toString() !== user._id.toString());
-    
+
     // Nếu nhóm trống thì xóa luôn nhóm
     if (group.members.length === 0) {
-        await Group.findByIdAndDelete(group._id);
+      await Group.findByIdAndDelete(group._id);
     } else {
-        // Nếu admin rời, chuyển quyền cho người kế tiếp
-        if (group.admin.toString() === user._id.toString()) {
-            group.admin = group.members[0];
-        }
-        await group.save();
+      // Nếu admin rời, chuyển quyền cho người kế tiếp
+      if (group.admin.toString() === user._id.toString()) {
+        group.admin = group.members[0];
+      }
+      await group.save();
     }
 
     user.group = null;
@@ -104,7 +104,7 @@ exports.removeMember = async (req, res) => {
     const group = await Group.findById(adminUser.group);
 
     if (group.admin.toString() !== adminUser._id.toString()) {
-        return res.status(403).json({ message: 'Chỉ trưởng nhóm mới được xóa' });
+      return res.status(403).json({ message: 'Chỉ trưởng nhóm mới được xóa' });
     }
 
     // Xóa khỏi Group
@@ -114,8 +114,8 @@ exports.removeMember = async (req, res) => {
     // Update User kia
     const member = await User.findById(memberId);
     if (member) {
-        member.group = null;
-        await member.save();
+      member.group = null;
+      await member.save();
     }
 
     res.status(200).json({ code: '00106', message: 'Đã mời ra khỏi nhóm' });

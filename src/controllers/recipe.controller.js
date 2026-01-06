@@ -22,3 +22,20 @@ exports.getRecipes = async (req, res) => {
     res.status(200).json({ code: '00378', data: recipes });
   } catch (error) { res.status(500).json({ message: error.message }); }
 };
+exports.updateRecipe = async (req, res) => {
+  try {
+    const { name, description, ingredients, instruction } = req.body;
+    const updatedRecipe = await Recipe.findByIdAndUpdate(
+      req.params.id,
+      { name, description, ingredients, instruction },
+      { new: true }
+    );
+    res.status(200).json({ code: '00388', data: updatedRecipe });
+  } catch (error) { res.status(500).json({ message: error.message }); }
+};
+exports.deleteRecipe = async (req, res) => {
+  try {
+    await Recipe.findByIdAndDelete(req.params.id);
+    res.status(200).json({ code: '00399', message: 'Đã xóa công thức' });
+  } catch (error) { res.status(500).json({ message: error.message }); }
+};

@@ -4,18 +4,23 @@ const User = require('../models/user.model');
 // Tạo thực phẩm mới (Code 00160)
 exports.createFood = async (req, res) => {
   try {
+    console.log("[CREATE FOOD] Body:", req.body);
     const { name, category, unit, image } = req.body;
     // Lấy group của user hiện tại
     const user = await User.findById(req.user._id);
-    if (!user.group) return res.status(400).json({ code: '00156', message: 'Hãy vào nhóm trước' });
 
-    const newFood = await Food.create({
-      name, category, unit, image,
-      group: user.group
-    });
+    const foodData = { name, category, unit, image };
+    if (user.group) {
+      foodData.group = user.group;
+    } else {
+      foodData.user = user._id;
+    }
+
+    const newFood = await Food.create(foodData);
 
     res.status(201).json({ code: '00160', message: 'Tạo thực phẩm thành công', data: newFood });
   } catch (error) {
+    console.log("[CREATE FOOD ERROR]", error);
     res.status(500).json({ code: '00159', message: error.message });
   }
 };
@@ -24,9 +29,14 @@ exports.createFood = async (req, res) => {
 exports.getAllFoods = async (req, res) => {
   try {
     const user = await User.findById(req.user._id);
-    if (!user.group) return res.status(400).json({ code: '00185', message: 'Bạn chưa vào nhóm' });
+    let foods;
 
-    const foods = await Food.find({ group: user.group });
+    if (user.group) {
+      foods = await Food.find({ group: user.group });
+    } else {
+      foods = await Food.find({ user: user._id });
+    }
+
     res.status(200).json({ code: '00188', data: foods });
   } catch (error) {
     res.status(500).json({ code: '00168', message: error.message });
